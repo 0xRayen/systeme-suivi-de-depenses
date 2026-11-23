@@ -1,0 +1,8 @@
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
