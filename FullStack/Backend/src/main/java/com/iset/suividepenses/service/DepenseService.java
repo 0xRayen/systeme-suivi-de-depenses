@@ -27,11 +27,30 @@ public class DepenseService {
         return depenseRepository.findAllByOrderByDateDescIdDesc();
     }
 
+    @Transactional(readOnly = true)
+    public Depense trouverParId(Long id) {
+        return depenseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Dépense introuvable pour l'identifiant " + id));
+    }
+
     @Transactional
     public Depense creer(DepensePayload payload) {
         var depense = new Depense();
         appliquerChamps(depense, payload);
         return depenseRepository.save(depense);
+    }
+
+    @Transactional
+    public Depense modifier(Long id, DepensePayload payload) {
+        var cible = trouverParId(id);
+        appliquerChamps(cible, payload);
+        return depenseRepository.save(cible);
+    }
+
+    @Transactional
+    public void supprimer(Long id) {
+        var cible = trouverParId(id);
+        depenseRepository.delete(cible);
     }
 
     protected void appliquerChamps(Depense cible, DepensePayload payload) {

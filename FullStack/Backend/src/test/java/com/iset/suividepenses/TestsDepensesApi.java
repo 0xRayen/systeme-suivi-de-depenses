@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -116,5 +117,38 @@ class TestsDepensesApi {
         depenseRepository.deleteAll();
         client.perform(delete("/api/categories/" + catId))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void verifierModificationSuppressionEt404Depense() throws Exception {
+        var creeJson = """
+                {"titre":"Ticket Bus","montant":2.00,"date":"2026-11-21","categorieId":%d,"description":"Trajet"}
+                """.formatted(alimentationId);
+        var resp = client.perform(post("/api/depenses").contentType(MediaType.APPLICATION_JSON).content(creeJson))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        var id = Long.parseLong(resp.replaceAll(".*\"id\"\\s*:\\s*(\\d+).*", "$1"));
+
+        client.perform(get("/api/depenses/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titre").value("Ticket Bus"));
+
+        var majJson = """
+                {"titre":"Taxi","montant":9.50,"date":"2026-11-22","categorieId":%d,"description":"Urgence"}
+                """.formatted(alimentationId);
+        client.perform(put("/api/depenses/" + id).contentType(MediaType.APPLICATION_JSON).content(majJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titre").value("Taxi"))
+                .andExpect(jsonPath("$.montant").value(9.50));
+
+        client.perform(delete("/api/depenses/" + id))
+                .andExpect(status().isNoContent());
+
+        client.perform(get("/api/depenses/" + id))
+                .andExpect(status().isNotFound());
+        client.perform(put("/api/depenses/999999").contentType(MediaType.APPLICATION_JSON).content(majJson))
+                .andExpect(status().isNotFound());
+        client.perform(delete("/api/depenses/999999"))
+                .andExpect(status().isNotFound());
     }
 }

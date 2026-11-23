@@ -26,7 +26,9 @@
 <div class="row g-4">
   <div class="col-lg-4">
     <div class="card shadow-sm">
-      <div class="card-header bg-white fw-semibold">Nouvelle dépense</div>
+      <div class="card-header bg-white fw-semibold">
+        {{ editingId !== null ? 'Modifier la dépense' : 'Nouvelle dépense' }}
+      </div>
       <div class="card-body">
         <form (ngSubmit)="enregistrer()">
           <div class="mb-3">
@@ -100,9 +102,16 @@
             ></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100" [disabled]="saving">
-            Enregistrer la dépense
-          </button>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="saving">
+              {{ editingId !== null ? 'Enregistrer les modifications' : 'Enregistrer la dépense' }}
+            </button>
+            @if (editingId !== null) {
+              <button type="button" class="btn btn-outline-secondary" (click)="annulerEdition()">
+                Annuler
+              </button>
+            }
+          </div>
         </form>
       </div>
     </div>
@@ -126,6 +135,7 @@
                   <th>Catégorie</th>
                   <th class="text-end">Montant</th>
                   <th>Description</th>
+                  <th class="text-end" style="width: 175px;">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -140,6 +150,22 @@
                       {{ dep.montant | number: '1.2-2' }} DT
                     </td>
                     <td class="text-muted small">{{ dep.description || '—' }}</td>
+                    <td class="text-end text-nowrap">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary me-1"
+                        (click)="commencerEdition(dep)"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="supprimer(dep)"
+                      >
+                        Supprimer
+                      </button>
+                    </td>
                   </tr>
                 }
               </tbody>

@@ -20,6 +20,7 @@ export class Depenses implements OnInit {
   date = this.dateAujourdhui();
   categorieId: number | null = null;
   description = '';
+  editingId: number | null = null;
 
   loading = false;
   saving = false;
@@ -95,9 +96,17 @@ export class Depenses implements OnInit {
     };
 
     this.saving = true;
-    this.depenseService.create(payload).subscribe({
+    const req$ =
+      this.editingId !== null
+        ? this.depenseService.update(this.editingId, payload)
+        : this.depenseService.create(payload);
+
+    req$.subscribe({
       next: () => {
-        this.successMessage = 'Dépense enregistrée avec succès.';
+        this.successMessage =
+          this.editingId !== null
+            ? 'Dépense mise à jour avec succès.'
+            : 'Dépense enregistrée avec succès.';
         this.reinitialiserFormulaire();
         this.saving = false;
         this.chargerDepenses();
@@ -109,11 +118,48 @@ export class Depenses implements OnInit {
     });
   }
 
+  commencerEdition(dep: Depense): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.editingId = dep.id;
+    this.titre = dep.titre;
+    this.montant = Number(dep.montant);
+    this.date = dep.date;
+    this.categorieId = dep.categorie.id ?? null;
+    this.description = dep.description ?? '';
+  }
+
+  annulerEdition(): void {
+    this.errorMessage = '';
+    this.reinitialiserFormulaire();
+  }
+
+  supprimer(dep: Depense): void {
+    if (!confirm(`Voulez-vous vraiment supprimer la dépense « ${dep.titre} » ?`)) {
+      return;
+    }
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.depenseService.delete(dep.id).subscribe({
+      next: () => {
+        if (this.editingId === dep.id) {
+          this.reinitialiserFormulaire();
+        }
+        this.successMessage = 'Dépense supprimée avec succès.';
+        this.chargerDepenses();
+      },
+      error: (err) => {
+        this.errorMessage = this.extraireErreur(err, 'Impossible de supprimer cette dépense.');
+      },
+    });
+  }
+
   get totalAffiche(): number {
     return this.depenses.reduce((acc, item) => acc + Number(item.montant), 0);
   }
 
   private reinitialiserFormulaire(): void {
+    this.editingId = null;
     this.titre = '';
     this.montant = null;
     this.date = this.dateAujourdhui();
