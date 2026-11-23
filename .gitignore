@@ -1,0 +1,43 @@
+# Secrets & configuration locale (ne jamais commiter)
+.env
+.env.*
+*.pem
+*.key
+application-local.properties
+application-secret.properties
+application-local.yml
+application-secret.yml
+
+# Java / Spring Boot / Maven
+FullStack/Backend/target/
+**/target/
+*.jar
+*.war
+*.ear
+*.class
+*.log
+!.mvn/wrapper/maven-wrapper.jar
+
+# Angular / Node.js
+FullStack/Frontend/node_modules/
+**/node_modules/
+FullStack/Frontend/dist/
+**/dist/
+.angular/
+out-tsc/
+*.tsbuildinfo
+
+# IDE & éditeurs
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# Fichiers système & verrous Office
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*.docx
+~$*.xlsx
+~$*.pptx
