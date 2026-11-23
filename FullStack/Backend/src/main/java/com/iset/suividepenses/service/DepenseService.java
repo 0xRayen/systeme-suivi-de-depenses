@@ -1,6 +1,9 @@
 package com.iset.suividepenses.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +28,26 @@ public class DepenseService {
     @Transactional(readOnly = true)
     public List<Depense> listerToutes() {
         return depenseRepository.findAllByOrderByDateDescIdDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Depense> rechercher(Long categorieId, String mois, String q) {
+        LocalDate debut = null;
+        LocalDate fin = null;
+        if (mois != null && !mois.trim().isEmpty()) {
+            try {
+                var ym = YearMonth.parse(mois.trim());
+                debut = ym.atDay(1);
+                fin = ym.atEndOfMonth();
+            } catch (DateTimeParseException ex) {
+                throw new BadRequestException("Format du mois invalide (attendu : AAAA-MM).");
+            }
+        }
+        var motCle = (q == null || q.trim().isEmpty()) ? null : q.trim();
+        if (categorieId == null && debut == null && motCle == null) {
+            return listerToutes();
+        }
+        return depenseRepository.rechercher(categorieId, debut, fin, motCle);
     }
 
     @Transactional(readOnly = true)

@@ -22,6 +22,10 @@ export class Depenses implements OnInit {
   description = '';
   editingId: number | null = null;
 
+  filtreCategorieId: number | null = null;
+  filtreMois = '';
+  filtreMotCle = '';
+
   loading = false;
   saving = false;
   errorMessage = '';
@@ -53,16 +57,43 @@ export class Depenses implements OnInit {
 
   chargerDepenses(): void {
     this.loading = true;
-    this.depenseService.getAll().subscribe({
-      next: (data) => {
-        this.depenses = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.errorMessage = this.extraireErreur(err, 'Impossible de charger les dépenses.');
-        this.loading = false;
-      },
-    });
+    this.depenseService
+      .getAll({
+        categorieId: this.filtreCategorieId,
+        mois: this.filtreMois,
+        q: this.filtreMotCle,
+      })
+      .subscribe({
+        next: (data) => {
+          this.depenses = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.errorMessage = this.extraireErreur(err, 'Impossible de charger les dépenses.');
+          this.loading = false;
+        },
+      });
+  }
+
+  appliquerFiltres(): void {
+    this.errorMessage = '';
+    this.chargerDepenses();
+  }
+
+  reinitialiserFiltres(): void {
+    this.errorMessage = '';
+    this.filtreCategorieId = null;
+    this.filtreMois = '';
+    this.filtreMotCle = '';
+    this.chargerDepenses();
+  }
+
+  get filtresActifs(): boolean {
+    return (
+      this.filtreCategorieId !== null ||
+      this.filtreMois.trim().length > 0 ||
+      this.filtreMotCle.trim().length > 0
+    );
   }
 
   enregistrer(): void {

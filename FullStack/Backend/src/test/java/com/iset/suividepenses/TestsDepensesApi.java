@@ -151,4 +151,47 @@ class TestsDepensesApi {
         client.perform(delete("/api/depenses/999999"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void verifierFiltrageEtRechercheDepenses() throws Exception {
+        var transportId = categorieRepository.findByNomIgnoreCase("Transport").orElseThrow().getId();
+
+        var d1 = """
+                {"titre":"Courses Supermarché","montant":45.00,"date":"2026-11-18","categorieId":%d}
+                """.formatted(alimentationId);
+        var d2 = """
+                {"titre":"Dîner Pizza","montant":22.00,"date":"2026-10-12","categorieId":%d}
+                """.formatted(alimentationId);
+        var d3 = """
+                {"titre":"Abonnement Bus","montant":30.00,"date":"2026-11-05","categorieId":%d}
+                """.formatted(transportId);
+
+        client.perform(post("/api/depenses").contentType(MediaType.APPLICATION_JSON).content(d1)).andExpect(status().isCreated());
+        client.perform(post("/api/depenses").contentType(MediaType.APPLICATION_JSON).content(d2)).andExpect(status().isCreated());
+        client.perform(post("/api/depenses").contentType(MediaType.APPLICATION_JSON).content(d3)).andExpect(status().isCreated());
+
+        client.perform(get("/api/depenses").param("categorieId", String.valueOf(alimentationId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+
+        client.perform(get("/api/depenses").param("mois", "2026-11"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+
+        client.perform(get("/api/depenses").param("q", "pizza"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].titre").value("Dîner Pizza"));
+
+        client.perform(get("/api/depenses")
+                        .param("categorieId", String.valueOf(alimentationId))
+                        .param("mois", "2026-11")
+                        .param("q", "courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].titre").value("Courses Supermarché"));
+
+        client.perform(get("/api/depenses").param("mois", "invalid"))
+                .andExpect(status().isBadRequest());
+    }
 }

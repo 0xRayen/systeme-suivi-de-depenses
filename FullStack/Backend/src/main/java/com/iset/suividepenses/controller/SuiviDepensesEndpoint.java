@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +29,11 @@ public class SuiviDepensesEndpoint {
     private final DepenseService depenseService;
 
     @GetMapping
-    public List<Depense> lireDepenses() {
-        return depenseService.listerToutes();
+    public List<Depense> lireDepenses(
+            @RequestParam(required = false) Long categorieId,
+            @RequestParam(required = false) String mois,
+            @RequestParam(required = false) String q) {
+        return depenseService.rechercher(categorieId, mois, q);
     }
 
     @GetMapping("/{id}")
