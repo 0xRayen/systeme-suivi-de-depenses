@@ -10,6 +10,7 @@ import com.iset.suividepenses.exception.BadRequestException;
 import com.iset.suividepenses.exception.ConflictException;
 import com.iset.suividepenses.exception.ResourceNotFoundException;
 import com.iset.suividepenses.repository.CategorieRepository;
+import com.iset.suividepenses.repository.DepenseRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class CategorieService {
 
     private final CategorieRepository repository;
+    private final DepenseRepository depenseRepository;
 
     @Transactional(readOnly = true)
     public List<Categorie> findAll() {
@@ -55,6 +57,9 @@ public class CategorieService {
     @Transactional
     public void delete(Long id) {
         Categorie cible = findById(id);
+        if (depenseRepository.existsByCategorieId(id)) {
+            throw new ConflictException("Impossible de supprimer cette catégorie car elle est liée à des dépenses existantes.");
+        }
         repository.delete(cible);
     }
 
