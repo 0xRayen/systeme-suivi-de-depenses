@@ -1,8 +1,121 @@
-<div class="card shadow-sm border-0">
-  <div class="card-body p-4">
-    <h1 class="h4 mb-2 text-primary">Gestion des catégories</h1>
-    <p class="text-muted mb-0">
-      Écran prêt pour le CRUD complet des catégories de dépenses (<strong>US-02</strong>).
-    </p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="h3 mb-1">Gestion des catégories</h2>
+    <p class="text-muted mb-0">Créez et organisez les catégories de vos dépenses quotidiennes.</p>
+  </div>
+  <span class="badge text-bg-primary fs-6">{{ categories.length }} catégorie(s)</span>
+</div>
+
+@if (errorMessage) {
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" aria-label="Fermer" (click)="errorMessage = ''"></button>
+  </div>
+}
+
+@if (successMessage) {
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" aria-label="Fermer" (click)="successMessage = ''"></button>
+  </div>
+}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        {{ editingId !== null ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="enregistrer()" #catForm="ngForm">
+          <div class="mb-3">
+            <label for="catNom" class="form-label">Nom *</label>
+            <input
+              id="catNom"
+              name="nom"
+              type="text"
+              class="form-control"
+              maxlength="100"
+              required
+              placeholder="Ex. Santé"
+              [(ngModel)]="formModel.nom"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="catDesc" class="form-label">Description</label>
+            <textarea
+              id="catDesc"
+              name="description"
+              class="form-control"
+              rows="3"
+              maxlength="255"
+              placeholder="Description facultative..."
+              [(ngModel)]="formModel.description"
+            ></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ editingId !== null ? 'Mettre à jour' : 'Ajouter' }}
+            </button>
+            @if (editingId !== null) {
+              <button type="button" class="btn btn-outline-secondary" (click)="annulerEdition()">
+                Annuler
+              </button>
+            }
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Liste des catégories</div>
+      <div class="card-body p-0">
+        @if (loading) {
+          <div class="p-4 text-center text-muted">Chargement des catégories...</div>
+        } @else if (categories.length === 0) {
+          <div class="p-4 text-center text-muted">Aucune catégorie enregistrée.</div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Nom</th>
+                  <th>Description</th>
+                  <th class="text-end" style="width: 190px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cat of categories; track cat.id) {
+                  <tr>
+                    <td class="fw-semibold">{{ cat.nom }}</td>
+                    <td class="text-muted">{{ cat.description || '—' }}</td>
+                    <td class="text-end">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary me-2"
+                        (click)="commencerEdition(cat)"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="supprimer(cat)"
+                      >
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 </div>
