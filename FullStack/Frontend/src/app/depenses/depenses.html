@@ -1,9 +1,152 @@
-<div class="card shadow-sm border-0">
-  <div class="card-body p-4">
-    <h1 class="h4 mb-2 text-primary">Gestion des dépenses</h1>
-    <p class="text-muted mb-0">
-      Écran prêt pour l'ajout, la consultation, la modification, la suppression et le filtrage des
-      dépenses quotidiennes (<strong>US-03 à US-05</strong>).
-    </p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="h3 mb-1">Suivi des dépenses</h2>
+    <p class="text-muted mb-0">Enregistrez vos achats quotidiens et consultez l'historique.</p>
+  </div>
+  <div class="text-end">
+    <span class="badge text-bg-primary fs-6 me-2">{{ depenses.length }} dépense(s)</span>
+    <span class="badge text-bg-success fs-6">Total : {{ totalAffiche | number: '1.2-2' }} DT</span>
+  </div>
+</div>
+
+@if (errorMessage) {
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" aria-label="Fermer" (click)="errorMessage = ''"></button>
+  </div>
+}
+
+@if (successMessage) {
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" aria-label="Fermer" (click)="successMessage = ''"></button>
+  </div>
+}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Nouvelle dépense</div>
+      <div class="card-body">
+        <form (ngSubmit)="enregistrer()">
+          <div class="mb-3">
+            <label for="depTitre" class="form-label">Titre *</label>
+            <input
+              id="depTitre"
+              name="titre"
+              type="text"
+              class="form-control"
+              maxlength="150"
+              required
+              placeholder="Ex. Courses supermarché"
+              [(ngModel)]="titre"
+            />
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="depMontant" class="form-label">Montant (DT) *</label>
+              <input
+                id="depMontant"
+                name="montant"
+                type="number"
+                class="form-control"
+                min="0.01"
+                step="0.01"
+                required
+                placeholder="0.00"
+                [(ngModel)]="montant"
+              />
+            </div>
+            <div class="col-6">
+              <label for="depDate" class="form-label">Date *</label>
+              <input
+                id="depDate"
+                name="date"
+                type="date"
+                class="form-control"
+                required
+                [(ngModel)]="date"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="depCat" class="form-label">Catégorie *</label>
+            <select
+              id="depCat"
+              name="categorieId"
+              class="form-select"
+              required
+              [(ngModel)]="categorieId"
+            >
+              <option [ngValue]="null" disabled>-- Choisir --</option>
+              @for (cat of categories; track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.nom }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="depDesc" class="form-label">Description</label>
+            <textarea
+              id="depDesc"
+              name="description"
+              class="form-control"
+              rows="2"
+              maxlength="500"
+              placeholder="Note facultative..."
+              [(ngModel)]="description"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100" [disabled]="saving">
+            Enregistrer la dépense
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Liste des dépenses (triées par date décroissante)</div>
+      <div class="card-body p-0">
+        @if (loading) {
+          <div class="p-4 text-center text-muted">Chargement des dépenses...</div>
+        } @else if (depenses.length === 0) {
+          <div class="p-4 text-center text-muted">Aucune dépense enregistrée pour le moment.</div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Titre</th>
+                  <th>Catégorie</th>
+                  <th class="text-end">Montant</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (dep of depenses; track dep.id) {
+                  <tr>
+                    <td class="text-nowrap">{{ dep.date }}</td>
+                    <td class="fw-semibold">{{ dep.titre }}</td>
+                    <td>
+                      <span class="badge text-bg-secondary">{{ dep.categorie.nom }}</span>
+                    </td>
+                    <td class="text-end fw-semibold text-nowrap">
+                      {{ dep.montant | number: '1.2-2' }} DT
+                    </td>
+                    <td class="text-muted small">{{ dep.description || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 </div>
