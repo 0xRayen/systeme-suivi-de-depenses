@@ -118,6 +118,65 @@
   </div>
 
   <div class="col-lg-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Filtrer et rechercher</span>
+        <span class="small text-primary fw-semibold">
+          {{ filtresActifs ? 'Total filtré' : 'Total affiché' }} :
+          {{ totalAffiche | number: '1.2-2' }} DT ({{ depenses.length }})
+        </span>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="appliquerFiltres()" class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label for="filtreCat" class="form-label small mb-1">Catégorie</label>
+            <select
+              id="filtreCat"
+              name="filtreCategorieId"
+              class="form-select form-select-sm"
+              [(ngModel)]="filtreCategorieId"
+            >
+              <option [ngValue]="null">Toutes</option>
+              @for (cat of categories; track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.nom }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filtreMois" class="form-label small mb-1">Mois</label>
+            <input
+              id="filtreMois"
+              name="filtreMois"
+              type="month"
+              class="form-control form-control-sm"
+              [(ngModel)]="filtreMois"
+            />
+          </div>
+          <div class="col-md-3">
+            <label for="filtreQ" class="form-label small mb-1">Mot-clé</label>
+            <input
+              id="filtreQ"
+              name="filtreMotCle"
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Rechercher un titre..."
+              [(ngModel)]="filtreMotCle"
+            />
+          </div>
+          <div class="col-md-3 d-flex gap-1">
+            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Filtrer</button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="reinitialiserFiltres()"
+            >
+              Réinitialiser
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div class="card shadow-sm">
       <div class="card-header bg-white fw-semibold">Liste des dépenses (triées par date décroissante)</div>
       <div class="card-body p-0">

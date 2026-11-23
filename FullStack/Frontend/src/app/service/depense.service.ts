@@ -3,6 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Depense, DepensePayload } from '../models/depense.model';
 
+export interface DepenseFiltres {
+  categorieId?: number | null;
+  mois?: string;
+  q?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -11,8 +17,18 @@ export class DepenseService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Depense[]> {
-    return this.http.get<Depense[]>(this.apiUrl);
+  getAll(filtres?: DepenseFiltres): Observable<Depense[]> {
+    let params = new HttpParams();
+    if (filtres?.categorieId !== null && filtres?.categorieId !== undefined) {
+      params = params.set('categorieId', String(filtres.categorieId));
+    }
+    if (filtres?.mois && filtres.mois.trim()) {
+      params = params.set('mois', filtres.mois.trim());
+    }
+    if (filtres?.q && filtres.q.trim()) {
+      params = params.set('q', filtres.q.trim());
+    }
+    return this.http.get<Depense[]>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<Depense> {
